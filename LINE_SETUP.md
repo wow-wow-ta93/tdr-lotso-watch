@@ -16,8 +16,8 @@ Botを作る＝LINEアカウントでのログインとアカウント新規作�
 2. 一番下の **「チャネルアクセストークン（長期）」→「発行」**
 3. 表示された長い文字列をコピー
 
-## 3. GitHubに登録（1分）
-ターミナルで下を実行し、貼り付けて Enter（画面には表示されません）:
+## 3. このMacに保存（1分）
+ターミナルで下を実行し、貼り付けて Enter（画面には表示されません。`~/.config/tdr-lotso-watch/env` に自分だけ読める権限で保存されます）:
 
 ```bash
 bash ~/Documents/genai-workspace/_tools/tdr-lotso-watch/setup_line_secret.sh

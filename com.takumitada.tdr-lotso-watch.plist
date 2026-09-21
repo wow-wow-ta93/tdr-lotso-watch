@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key><string>com.takumitada.tdr-lotso-watch</string>
+  <key>ProgramArguments</key>
+  <array><string>/bin/bash</string><string>/Users/takumitada/Documents/genai-workspace/_tools/tdr-lotso-watch/run.sh</string></array>
+  <key>StartInterval</key><integer>900</integer>
+  <key>RunAtLoad</key><true/>
+  <key>ProcessType</key><string>Background</string>
+  <key>StandardOutPath</key><string>/Users/takumitada/Documents/genai-workspace/_tools/tdr-lotso-watch/logs/launchd.out</string>
+  <key>StandardErrorPath</key><string>/Users/takumitada/Documents/genai-workspace/_tools/tdr-lotso-watch/logs/launchd.err</string>
+</dict>
+</plist>

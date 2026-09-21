@@ -66,12 +66,13 @@ def save_state(st: dict) -> None:
 
 
 # ---------- LINE ----------
-def line_broadcast(text: str, dry_run: bool = False) -> None:
+def line_broadcast(text: str, dry_run: bool = False) -> bool:
+    """送信できたら True。トークン未設定なら送らず False（state 側は「未通知」のままにする）"""
     token = os.environ.get("LINE_CHANNEL_TOKEN")
     if dry_run or not token:
         print("[LINE dry-run]" if dry_run else "[LINE skipped: no LINE_CHANNEL_TOKEN]")
         print(text)
-        return
+        return False
     req = urllib.request.Request(
         "https://api.line.me/v2/bot/message/broadcast",
         data=json.dumps({"messages": [{"type": "text", "text": text}]}).encode(),
@@ -80,6 +81,7 @@ def line_broadcast(text: str, dry_run: bool = False) -> None:
     )
     with urllib.request.urlopen(req, timeout=30) as r:
         print("LINE broadcast:", r.status)
+    return True
 
 
 def fmt_date(use_date: str) -> str:
@@ -103,9 +105,15 @@ def fetch_week(use_date: str, headless: bool = False, timeout_sec: int = 300) ->
     from playwright.sync_api import sync_playwright
 
     with sync_playwright() as p:
-        # ヘッドレスはサイトのボット対策で応答が返らないため、通常モード（CIでは xvfb-run 経由）で開く
+        # ヘッドレスはサイトのボット対策で応答が返らないため、通常モードのウィンドウを画面外に出して開く
         browser = p.chromium.launch(
-            headless=headless, channel="chromium", args=["--disable-blink-features=AutomationControlled"]
+            headless=headless,
+            channel="chromium",
+            args=[
+                "--disable-blink-features=AutomationControlled",
+                "--window-position=-3000,-3000",
+                "--window-size=1280,900",
+            ],
         )
         ctx = browser.new_context(
             locale="ja-JP",
@@ -234,15 +242,14 @@ def main() -> int:
         line_broadcast(f"✅ {RESTAURANT_NAME} 空席監視が復旧しました")
     st["fail_count"], st["alerted_down"] = 0, False
     if not st.get("started"):
-        line_broadcast(
+        st["started"] = line_broadcast(
             f"👀 {RESTAURANT_NAME} 空席監視を開始しました\n{fmt_date(USE_DATE)} {MEAL} {WINDOW[0]}〜{WINDOW[1]}"
             f"（大人{ADULT_NUM}・子ども{len(CHILD_AGES)}）を15分おきに確認します。"
         )
-        st["started"] = True
 
     if opens and opens != st.get("last_notified"):
-        line_broadcast(vacancy_message(opens))
-        st["last_notified"] = opens
+        if line_broadcast(vacancy_message(opens)):
+            st["last_notified"] = opens
     elif not opens:
         st["last_notified"] = []
     st["log"].append({"t": now.isoformat(timespec="minutes"), "open": opens})
